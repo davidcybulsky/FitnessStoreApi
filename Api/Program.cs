@@ -1,7 +1,11 @@
+using Api.Dtos;
 using Api.Entities;
 using Api.Interfaces;
+using Api.Middlewares;
 using Api.Services;
 using Api.Settings;
+using Api.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -36,10 +40,16 @@ builder.Services.AddAuthentication(x =>
 });
 
 //Dependencies
-builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<ApiContext>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<ErrorHandlingMiddleware>();
+
+//Fluent Validation
+builder.Services.AddScoped<IValidator<SignUpDto>, SignUpDtoValidator>();
+builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
+
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -68,6 +78,8 @@ if (app.Environment.IsDevelopment())
 }
 
 //Middlewares
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

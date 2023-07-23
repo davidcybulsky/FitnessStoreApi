@@ -5,6 +5,6 @@ namespace Api.Interfaces
     public interface IAccountService
     {
         Task<TokenDto> LoginAsync(LoginDto loginDto);
-        Task SignUpAsync(SignUpDto signUpDto);
+        Task<int> SignUpAsync(SignUpDto signUpDto);
     }
 }

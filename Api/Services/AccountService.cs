@@ -3,6 +3,7 @@ using Api.Entities;
 using Api.Exceptions;
 using Api.Interfaces;
 using Api.Settings;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -15,12 +16,17 @@ namespace Api.Services
     public class AccountService : IAccountService
     {
         private readonly ApiContext _db;
+        private readonly IMapper _mapper;
         private readonly JwtSettings _jwtSettings;
         private readonly IPasswordHasher<User> _passwordHasher;
 
-        public AccountService(ApiContext db, IOptions<JwtSettings> jwtSettings, IPasswordHasher<User> passwordHasher)
+        public AccountService(ApiContext db,
+                              IMapper mapper,
+                              IOptions<JwtSettings> jwtSettings,
+                              IPasswordHasher<User> passwordHasher)
         {
             _db = db;
+            _mapper = mapper;
             _jwtSettings = jwtSettings.Value;
             _passwordHasher = passwordHasher;
         }
@@ -63,9 +69,20 @@ namespace Api.Services
             return jwt;
         }
 
-        public Task SignUpAsync(SignUpDto signUpDto)
+        public async Task<int> SignUpAsync(SignUpDto signUpDto)
         {
             throw new NotImplementedException();
+
+            var newUser = _mapper.Map<User>(signUpDto);
+            await _db.AddAsync(newUser);
+            await _db.SaveChangesAsync();
+
+            var hashedPassword = _passwordHasher.HashPassword(newUser, signUpDto.Password);
+            newUser.HashedPassword = hashedPassword;
+
+            await _db.SaveChangesAsync();
+
+            return newUser.Id;
         }
     }
 }
