@@ -6,5 +6,8 @@ namespace Api.Interfaces
     {
         Task<TokenDto> LoginAsync(LoginDto loginDto);
         Task<int> SignUpAsync(SignUpDto signUpDto);
+        Task<AccountDto> GetAccountAsync();
+        Task UpdateAccountAsync(UpdateAccountDto accountDto);
+        Task DeleteAccountAsync();
     }
 }
