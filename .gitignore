@@ -398,3 +398,6 @@ FodyWeavers.xsd
 *.sln.iml
 /Api/appsettings.json
 /Api/appsettings.Development.json
+
+.idea
+Api/Migrations/*

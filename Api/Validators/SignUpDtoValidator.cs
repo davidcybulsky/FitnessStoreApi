@@ -1,7 +1,6 @@
 ﻿using Api.Dtos;
 using Api.Entities;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 
 namespace Api.Validators
 {
@@ -11,9 +10,9 @@ namespace Api.Validators
         {
             RuleFor(signUpDto => signUpDto.Email)
                 .EmailAddress()
-                .MustAsync(async (email, context) =>
+                .Must((signUpDto, context) =>
                 {
-                    var isEmailInDb = await db.Users.AnyAsync(u => u.Email == email);
+                    var isEmailInDb = db.Users.Any(u => u.Email == signUpDto.Email);
                     return !isEmailInDb;
                 }).WithMessage("This email has already been taken.");
 

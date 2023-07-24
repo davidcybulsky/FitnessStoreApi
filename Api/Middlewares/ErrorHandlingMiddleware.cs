@@ -15,11 +15,11 @@ namespace Api.Middlewares
                 context.Response.StatusCode = 400;
                 await context.Response.WriteAsync(ex.Message);
             }
-            catch (Exception ex)
+            /*catch (Exception ex)
             {
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsync("Something went wrong. Try again later or contact the support.");
-            }
+            }*/
         }
     }
 }
