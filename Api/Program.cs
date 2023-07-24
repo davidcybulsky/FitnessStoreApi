@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -50,9 +52,11 @@ builder.Services.AddAuthentication(x =>
 //Dependencies
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<ApiContext>();
+builder.Services.AddScoped<IHttpContextService, HttpContextService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
+builder.Services.AddHttpContextAccessor();
 
 //Fluent Validation
 builder.Services.AddScoped<IValidator<SignUpDto>, SignUpDtoValidator>();
@@ -75,6 +79,19 @@ builder.Services.AddSwaggerGen(options =>
                       "This project is the server side of my fitness store, which contains workout and diet plans",
         Contact = new OpenApiContact { Name = "Github", Url = new Uri("https://github.com/davidcybulsky") }
     });
+
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    {
+        Description = "Standard Authorization header using the Bearer scheme (\"bearer {token}\")",
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
 //Cors

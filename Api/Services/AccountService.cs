@@ -19,16 +19,43 @@ namespace Api.Services
         private readonly IMapper _mapper;
         private readonly JwtSettings _jwtSettings;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IHttpContextService _httpContextService;
 
         public AccountService(ApiContext db,
                               IMapper mapper,
                               JwtSettings jwtSettings,
-                              IPasswordHasher<User> passwordHasher)
+                              IPasswordHasher<User> passwordHasher,
+                              IHttpContextService httpContextService)
         {
             _db = db;
             _mapper = mapper;
             _jwtSettings = jwtSettings;
             _passwordHasher = passwordHasher;
+            _httpContextService = httpContextService;
+        }
+
+        public async Task DeleteAccountAsync()
+        {
+            var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation.");
+
+            var user = await _db.Users
+                .FirstOrDefaultAsync(u => u.Id == id) ?? throw new BadRequestException("The resource can not be deleted");
+
+            _db.Users.Remove(user);
+
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<AccountDto> GetAccountAsync()
+        {
+            var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation.");
+
+            var user = await _db.Users
+                .FirstOrDefaultAsync(u => u.Id == id) ?? throw new NotFoundException("The resource can not be found");
+
+            var accountDto = _mapper.Map<AccountDto>(user);
+
+            return accountDto;
         }
 
         public async Task<TokenDto> LoginAsync(LoginDto loginDto)
@@ -80,6 +107,11 @@ namespace Api.Services
             await _db.SaveChangesAsync();
 
             return newUser.Id;
+        }
+
+        public async Task UpdateAccountAsync(UpdateAccountDto updateAccountDto)
+        {
+            throw new NotImplementedException();
         }
     }
 }
