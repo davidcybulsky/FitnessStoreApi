@@ -6,17 +6,25 @@ using Api.Services;
 using Api.Settings;
 using Api.Validators;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //AppSettings
 var JwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-builder.Services.AddSingleton<JwtSettings>(JwtSettings);
+builder.Services.AddSingleton(JwtSettings);
+
+var CorsSettings = builder.Configuration.GetSection("Cors").Get<CorsSettings>();
+builder.Services.AddSingleton(CorsSettings);
+
+var DatabaseSettings = builder.Configuration.GetSection("Database").Get<DatabaseSettings>();
+builder.Services.AddSingleton(DatabaseSettings);
 
 //Authentication
 builder.Services.AddAuthentication(x =>
@@ -52,7 +60,8 @@ builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
 
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddFluentValidation()
+    .AddJsonOptions(option => option.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -62,11 +71,14 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "FitnessStoreApi",
         Version = "v1",
-        Description = "Ten project jest czêœci¹ serwerow¹ mojego sklepu z planami treningowymi i ¿ywieniowymi." +
+        Description = "Ten project jest czêœci¹ serwerow¹ mojego sklepu z planami treningowymi i ¿ywieniowymi.\n" +
                       "This project is the server side of my fitness store, which contains workout and diet plans",
         Contact = new OpenApiContact { Name = "Github", Url = new Uri("https://github.com/davidcybulsky") }
     });
 });
+
+//Cors
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -79,7 +91,9 @@ if (app.Environment.IsDevelopment())
 
 //Middlewares
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
+//app.UseMiddleware<ErrorHandlingMiddleware>();
+
+app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().WithOrigins(CorsSettings.Client));
 
 app.UseHttpsRedirection();
 
