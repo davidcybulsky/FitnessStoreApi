@@ -9,6 +9,9 @@ namespace Api.Settings
         public MapperProfiles()
         {
             CreateMap<SignUpDto, User>();
+            CreateMap<User, AccountDto>();
+            CreateMap<Address, AddressDto>();
+            CreateMap<CreateAddressDto, Address>();
         }
     }
 }

@@ -17,10 +17,14 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Endpoint odpowiada za logowanie użytkowników
         /// </summary>
-        /// <param name="loginDto"></param>
-        /// <returns></returns>
+        /// <param name="loginDto">
+        /// Model transferu danych, który zawiera dane logowania - email i hasło
+        /// </param>
+        /// <returns>
+        /// Zwraca token JWT, którym posługuje się użytkownik w celu autentykacji i autoryzacji
+        /// </returns>
 
         [HttpPost("login")]
         public async Task<ActionResult<TokenDto>> Login([FromBody] LoginDto loginDto)
@@ -30,10 +34,13 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Endpoint odpowiada za rejestracje użytkówników
         /// </summary>
-        /// <param name="signUpDto"></param>
-        /// <returns></returns>
+        /// <param name="signUpDto">
+        /// Model transferu danych zawierający dane do utworzenia konta
+        /// </param>
+        /// <returns>
+        /// </returns>
 
         [HttpPost("signup")]
         public async Task<ActionResult> SignUp([FromBody] SignUpDto signUpDto)
@@ -43,7 +50,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Metoda zwracająca accountDto na podstawie tokena JWT w nagłówku zapytania
+        /// Endpoint odpowiada za zwacanie danych konta użytkownika
         /// </summary>
         /// <returns>
         /// Model transferu danych dla konta
@@ -59,9 +66,11 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Endpoint odpowiada za aktualizowanie konta
         /// </summary>
-        /// <param name="updateAccountDto"></param>
+        /// <param name="updateAccountDto">
+        /// Model transferu danych zawierający dane zaktualizowanego konta
+        /// </param>
         /// <returns></returns>
 
         [Authorize]
@@ -73,7 +82,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Endpoint odpowiada za usuwanie konta użytownika
         /// </summary>
         /// <returns></returns>
 

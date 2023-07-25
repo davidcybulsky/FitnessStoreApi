@@ -36,22 +36,32 @@ namespace Api.Services
 
         public async Task DeleteAccountAsync()
         {
-            var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation.");
+            var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation");
 
-            var user = await _db.Users
+            var user = await _db.Users.Include(u => u.Address).Include(u => u.Subscriptions)
                 .FirstOrDefaultAsync(u => u.Id == id) ?? throw new BadRequestException("The resource can not be deleted");
 
-            _db.Users.Remove(user);
+            if (user.IsDeleted)
+            {
+                throw new BadRequestException("The resource can not be deleted");
+            }
+
+            user.IsDeleted = true;
 
             await _db.SaveChangesAsync();
         }
 
         public async Task<AccountDto> GetAccountAsync()
         {
-            var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation.");
+            var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation");
 
-            var user = await _db.Users
+            var user = await _db.Users.AsNoTracking().Include(u => u.Address).Include(u => u.Subscriptions)
                 .FirstOrDefaultAsync(u => u.Id == id) ?? throw new NotFoundException("The resource can not be found");
+
+            if (user.IsDeleted)
+            {
+                throw new NotFoundException("The resource can not be found");
+            }
 
             var accountDto = _mapper.Map<AccountDto>(user);
 
@@ -61,13 +71,19 @@ namespace Api.Services
         public async Task<TokenDto> LoginAsync(LoginDto loginDto)
         {
 
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email) ?? throw new BadRequestException("Bad email or password.");
+            var user = await _db.Users.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email == loginDto.Email) ?? throw new BadRequestException("Bad email or password");
+
+            if (user.IsDeleted)
+            {
+                throw new BadRequestException("Bad email or password");
+            }
 
             var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.HashedPassword, loginDto.Password);
 
             if (passwordVerificationResult == PasswordVerificationResult.Failed)
             {
-                throw new BadRequestException("Bad email or password.");
+                throw new BadRequestException("Bad email or password");
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -99,6 +115,7 @@ namespace Api.Services
         {
 
             var newUser = _mapper.Map<User>(signUpDto);
+            newUser.CreatedDate = DateTime.UtcNow;
             await _db.AddAsync(newUser);
 
             var hashedPassword = _passwordHasher.HashPassword(newUser, signUpDto.Password);
@@ -111,7 +128,29 @@ namespace Api.Services
 
         public async Task UpdateAccountAsync(UpdateAccountDto updateAccountDto)
         {
-            throw new NotImplementedException();
+
+            var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation");
+
+            var user = await _db.Users.Include(u => u.Address)
+                .FirstOrDefaultAsync(u => u.Id == id) ?? throw new NotFoundException("The resource does not exist");
+
+            if (user.IsDeleted)
+            {
+                throw new NotFoundException("The resource does not exist");
+            }
+
+            user.FirstName = updateAccountDto.FirstName;
+            user.LastName = updateAccountDto.LastName;
+            user.Email = updateAccountDto.Email;
+            user.PhoneNumber = updateAccountDto.PhoneNumber;
+            user.Address.Number = updateAccountDto.Address.Number;
+            user.Address.Street = updateAccountDto.Address.Street;
+            user.Address.City = updateAccountDto.Address.City;
+            user.Address.ZipCode = updateAccountDto.Address.ZipCode;
+            user.Address.Country = updateAccountDto.Address.Country;
+            user.LastUpdatedDate = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
         }
     }
 }

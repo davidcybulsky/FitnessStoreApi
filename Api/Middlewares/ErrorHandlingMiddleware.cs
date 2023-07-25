@@ -15,6 +15,21 @@ namespace Api.Middlewares
                 context.Response.StatusCode = 400;
                 await context.Response.WriteAsync(ex.Message);
             }
+            catch (UnauthorizedException ex)
+            {
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync(ex.Message);
+            }
+            catch (ForbiddenException ex)
+            {
+                context.Response.StatusCode = 403;
+                await context.Response.WriteAsync(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync(ex.Message);
+            }
             /*catch (Exception ex)
             {
                 context.Response.StatusCode = 500;

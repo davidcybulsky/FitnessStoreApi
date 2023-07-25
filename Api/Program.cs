@@ -49,6 +49,8 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+builder.Services.AddAuthorization();
+
 //Dependencies
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<ApiContext>();

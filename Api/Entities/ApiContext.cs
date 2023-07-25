@@ -21,6 +21,10 @@ namespace Api.Entities
                 builderAction.HasMany(u => u.Subscriptions)
                 .WithOne(s => s.User)
                 .HasForeignKey(u => u.UserId);
+
+                builderAction.HasOne(u => u.Address)
+                .WithOne()
+                .HasForeignKey<User>(u => u.AddressId);
             });
 
             modelBuilder.Entity<Plan>(builderAction =>
