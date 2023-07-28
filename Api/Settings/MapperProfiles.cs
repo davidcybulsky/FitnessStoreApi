@@ -12,6 +12,7 @@ namespace Api.Settings
             CreateMap<User, AccountDto>();
             CreateMap<Address, AddressDto>();
             CreateMap<CreateAddressDto, Address>();
+            CreateMap<Subscription, SubscriptionDto>();
         }
     }
 }

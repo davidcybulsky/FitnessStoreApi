@@ -8,6 +8,8 @@ namespace Api.Entities
         private DatabaseSettings _databaseSettings;
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<Plan> Plans { get; set; }
 
         public ApiContext(DatabaseSettings databaseSettings)
         {
