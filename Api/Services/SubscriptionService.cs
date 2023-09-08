@@ -99,6 +99,7 @@ namespace Api.Services
             }
 
             subscription.PlanId = planId;
+            subscription.BuyDate = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
 

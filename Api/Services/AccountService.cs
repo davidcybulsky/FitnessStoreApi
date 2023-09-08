@@ -155,7 +155,6 @@ namespace Api.Services
 
             user.FirstName = updateAccountDto.FirstName;
             user.LastName = updateAccountDto.LastName;
-            user.Email = updateAccountDto.Email;
             user.PhoneNumber = updateAccountDto.PhoneNumber;
             user.Address.Number = updateAccountDto.Address.Number;
             user.Address.Street = updateAccountDto.Address.Street;
