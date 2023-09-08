@@ -6,6 +6,7 @@ namespace Api.Interfaces
     {
         Task<SubscriptionDto> GetAsync();
         Task<int> SubscribeAsync(int planId);
-        Task UnsubscribeAsync(int id);
+        Task UpdateSubscriptionAsync(int subscriptionId, int planId);
+        Task UnsubscribeAsync(int subscriptionId);
     }
 }

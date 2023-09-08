@@ -2,6 +2,7 @@
 using Api.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Api.Controllers
 {
@@ -43,8 +44,25 @@ namespace Api.Controllers
         public async Task<ActionResult<int>> Subscribe([FromRoute] int planId)
         {
             var subId = await _service.SubscribeAsync(planId);
-            return StatusCode(204, subId);
+            return StatusCode(201, subId);
         }
+
+        /// <summary>
+        /// Endpoint odpowiada za zmianę planu w subskrypcji
+        /// </summary>
+        /// <param name="subscriptionId">Id subskrypcji do zmiany</param>
+        /// <param name="planId">Id planu do subskrypcji</param>
+        /// <returns>
+        /// Nic nie zwraca
+        /// </returns>
+
+        [HttpPut("{subscriptionId}")]
+        public async Task<ActionResult> UpdatePlan([FromRoute] int subscriptionId, [FromQuery][Required] int planId)
+        {
+            await _service.UpdateSubscriptionAsync(subscriptionId, planId);
+            return StatusCode(204);
+        }
+
 
         /// <summary>
         /// Endpoint odpowiada za anulowanie subskrypcji

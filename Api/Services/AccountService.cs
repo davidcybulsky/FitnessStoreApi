@@ -36,10 +36,14 @@ namespace Api.Services
 
         public async Task DeleteAccountAsync()
         {
-            var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation");
+            var id = _httpContextService.GetUserId
+                ?? throw new UnauthorizedException("Unauthorized operation");
 
-            var user = await _db.Users.Include(u => u.Address).Include(u => u.Subscriptions)
-                .FirstOrDefaultAsync(u => u.Id == id) ?? throw new BadRequestException("The resource can not be deleted");
+            var user = await _db.Users
+                .Include(u => u.Address)
+                .Include(u => u.Subscriptions)
+                .FirstOrDefaultAsync(u => u.Id == id)
+                ?? throw new BadRequestException("The resource can not be deleted");
 
             if (user.IsDeleted)
             {
@@ -55,7 +59,10 @@ namespace Api.Services
         {
             var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation");
 
-            var user = await _db.Users.AsNoTracking().Include(u => u.Address).Include(u => u.Subscriptions)
+            var user = await _db.Users
+                .AsNoTracking()
+                .Include(u => u.Address)
+                .Include(u => u.Subscriptions)
                 .FirstOrDefaultAsync(u => u.Id == id) ?? throw new NotFoundException("The resource can not be found");
 
             if (user.IsDeleted)
@@ -71,15 +78,18 @@ namespace Api.Services
         public async Task<TokenDto> LoginAsync(LoginDto loginDto)
         {
 
-            var user = await _db.Users.AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == loginDto.Email) ?? throw new BadRequestException("Bad email or password");
+            var user = await _db.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email == loginDto.Email)
+                ?? throw new BadRequestException("Bad email or password");
 
             if (user.IsDeleted)
             {
                 throw new BadRequestException("Bad email or password");
             }
 
-            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.HashedPassword, loginDto.Password);
+            var passwordVerificationResult = _passwordHasher
+                .VerifyHashedPassword(user, user.HashedPassword, loginDto.Password);
 
             if (passwordVerificationResult == PasswordVerificationResult.Failed)
             {
@@ -118,7 +128,9 @@ namespace Api.Services
             newUser.CreatedDate = DateTime.UtcNow;
             await _db.AddAsync(newUser);
 
-            var hashedPassword = _passwordHasher.HashPassword(newUser, signUpDto.Password);
+            var hashedPassword = _passwordHasher
+                .HashPassword(newUser, signUpDto.Password);
+
             newUser.HashedPassword = hashedPassword;
 
             await _db.SaveChangesAsync();
@@ -129,9 +141,11 @@ namespace Api.Services
         public async Task UpdateAccountAsync(UpdateAccountDto updateAccountDto)
         {
 
-            var id = _httpContextService.GetUserId ?? throw new UnauthorizedException("Unauthorized operation");
+            var id = _httpContextService.GetUserId
+                ?? throw new UnauthorizedException("Unauthorized operation");
 
-            var user = await _db.Users.Include(u => u.Address)
+            var user = await _db.Users
+                .Include(u => u.Address)
                 .FirstOrDefaultAsync(u => u.Id == id) ?? throw new NotFoundException("The resource does not exist");
 
             if (user.IsDeleted)
@@ -141,7 +155,6 @@ namespace Api.Services
 
             user.FirstName = updateAccountDto.FirstName;
             user.LastName = updateAccountDto.LastName;
-            user.Email = updateAccountDto.Email;
             user.PhoneNumber = updateAccountDto.PhoneNumber;
             user.Address.Number = updateAccountDto.Address.Number;
             user.Address.Street = updateAccountDto.Address.Street;
